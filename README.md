@@ -3,7 +3,7 @@
 # LizardTCP
 Fast, async, simple and scalable TCP/UDP/HTTP/HTTPS/WS/WSS proxy server with some interactive protection and statistics, written in C#.
 
-## Rule configuration
+## Example rule configuration
 
 ```json
 [
@@ -16,6 +16,18 @@ Fast, async, simple and scalable TCP/UDP/HTTP/HTTPS/WS/WSS proxy server with som
     "bindPort": 8081
   }
 ]
+```
+
+## Example proxy configuration
+
+```json
+{
+  "proxy_mode": "transparent",
+  "debug": true,
+  "useCFHeaders": false,
+  "bindingIP": "127.0.0.1",
+  "bindingPort": "8080"
+}
 ```
 
 Development stages:
