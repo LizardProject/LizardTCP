@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLog" Version="4.7.12" />
+    <PackageReference Include="Watson" Version="4.2.2.3" />
   </ItemGroup>
 
   <ItemGroup>

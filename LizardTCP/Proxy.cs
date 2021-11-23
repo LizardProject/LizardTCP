@@ -50,10 +50,52 @@ namespace LizardTCP
                     if (bytesRead > 0)
                     {
                         Console.WriteLine("SocketBalancer got data! IP: " + state.DestinationSocket.LocalEndPoint.ToString());
-                        //Start an asyncronous send.
-                        var sendAr = state.DestinationSocket.BeginSend(state.Buffer, 0, bytesRead, SocketFlags.None, null, null);
-
+                        var str = Encoding.Default.GetString(state.Buffer);
                         //Get or create a new buffer for the state object.
+                        /*  */
+                        byte[] bytes3 = Encoding.Default.GetBytes("HTTP/1.1 200 OK");
+                        byte[] bytes = Encoding.Default.GetBytes("\nx-lizardtcp: LizardTCP/Alfa");
+                        byte[] bytes2 = Encoding.Default.GetBytes("\nx-lizardtcp-node: rulocal1");
+                        bool isHttp = false;
+                        for (int t = 0; t < 15; t++)
+                        {
+                            if (state.Buffer[t] == bytes3[t])
+                            {
+                                isHttp = true;
+                            }
+                            else
+                                isHttp = false;
+                        }
+
+                        byte[] responseBuff = new byte[] { };
+                        if (isHttp)
+                        {
+                            Console.WriteLine("Found HTTP Answer");
+                            byte[] smallPortion = state.Buffer.Skip(15).Take((state.Buffer.Length - 15)).ToArray();
+                            //responseBuff = new byte[bytes3.Length + bytes.Length + bytes2.Length + smallPortion.Length];
+                            responseBuff = new byte[0];
+                            Array.Reverse(bytes, 0, bytes.Length);
+                            Array.Reverse(bytes2, 0, bytes2.Length);
+                            Array.Reverse(bytes3, 0, bytes3.Length);
+                            responseBuff = AddByteAToArray(smallPortion, bytes);
+                            responseBuff = AddByteAToArray(responseBuff, bytes2);
+                            responseBuff = AddByteAToArray(responseBuff, bytes3);
+                            Console.WriteLine(Encoding.Default.GetString(responseBuff));
+                            //responseBuff = state.Buffer;
+                        }
+
+                        //Start an asyncronous send.
+                        IAsyncResult sendAr = null;
+                        if (isHttp)
+                        {
+                            sendAr = state.DestinationSocket.BeginSend(responseBuff, 0,
+                                                     bytesRead + bytes2.Length + bytes2.Length + 2, SocketFlags.None, null, null);
+                        }
+                        else
+                        {
+                            sendAr = state.DestinationSocket.BeginSend(state.Buffer, 0, bytesRead, SocketFlags.None, null, null);
+                        }
+
                         var oldBuffer = state.ReplaceBuffer();
 
                         state.SourceSocket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0, OnDataReceive, state);
@@ -72,7 +114,26 @@ namespace LizardTCP
                 }
             }
 
-            private class State
+            public static byte[] AddByteAToArray(byte[] bArray, byte[] newByte)
+            {
+                byte[] ss = AddByteToArray(bArray, newByte[0]);
+                for (int i = 1; i < newByte.Length; ++i)
+                {
+                    ss = AddByteToArray(ss, newByte[i]);
+                }
+
+                return ss;
+            }
+
+            public static byte[] AddByteToArray(byte[] bArray, byte newByte)
+            {
+                byte[] newArray = new byte[bArray.Length + 1];
+                bArray.CopyTo(newArray, 1);
+                newArray[0] = newByte;
+                return newArray;
+            }
+
+            public class State
             {
                 private readonly ConcurrentBag<byte[]> _bufferPool = new ConcurrentBag<byte[]>();
                 private readonly int _bufferSize;

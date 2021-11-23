@@ -11,9 +11,9 @@ namespace LizardTCP
         public string ruleName { get; set; }
         public string ruleType { get; set; }
         public string ruleIP { get; set; }
-        public string rulePort { get; set; }
+        public int rulePort { get; set; }
         public string bindIP { get; set; }
-        public string bindPort { get; set; }
+        public int bindPort { get; set; }
     }
 
     public class SettingsClass
@@ -22,6 +22,6 @@ namespace LizardTCP
         public bool debug { get; set; }
         public bool useCFHeaders { get; set; }
         public string bindingIP { get; set; }
-        public string bindingPort { get; set; }
+        public int bindingPort { get; set; }
     }
 }

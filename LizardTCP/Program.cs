@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -54,6 +59,20 @@ namespace LizardTCP
             await InitializeConfigsAsync();
 
             Logger.Info("Starting LizardTCP...");
+            Dictionary<string, Thread> RulesTasksDict = new Dictionary<string, Thread>();
+            foreach (var _rule in Rules)
+            {
+                var t = new Thread(() => Task.Factory.StartNew(() => new Proxy.TcpForwarderSlim().Start(
+                    new IPEndPoint(IPAddress.Parse(_rule.bindIP), _rule.bindPort),
+                    new IPEndPoint(IPAddress.Parse(_rule.ruleIP), _rule.rulePort))).ConfigureAwait(false));
+                t.Start();
+                RulesTasksDict.Add(_rule.ruleName, t);
+                Logger.Info("Activated: " + _rule.ruleName);
+            }
+            Logger.Info("Task created!");
+            while (true)
+            {
+            }
         }
 
         public static async Task InitializeConfigsAsync()

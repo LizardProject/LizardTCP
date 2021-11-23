@@ -3,16 +3,16 @@
     "ruleName": "ExampleForward",
     "ruleType": "HTTP",
     "ruleIP": "69.164.223.208",
-    "rulePort": "80",
+    "rulePort": 80,
     "bindIP": "127.0.0.1",
-    "bindPort": "8081"
+    "bindPort": 8081
   },
   {
-    "ruleName": "WebSocket",
-    "ruleType": "WS",
-    "ruleIP": "69.164.223.208",
-    "rulePort": "80",
+    "ruleName": "TCPExample",
+    "ruleType": "TCP",
+    "ruleIP": "127.0.0.1",
+    "rulePort": 5555,
     "bindIP": "127.0.0.1",
-    "bindPort": "8082"
+    "bindPort": 6666
   }
 ]
