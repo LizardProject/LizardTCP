@@ -1,0 +1,7 @@
+{
+  "proxy_mode": "transparent",
+  "debug": true,
+  "useCFHeaders": false,
+  "bindingIP": "127.0.0.1",
+  "bindingPort": "8080"
+}
