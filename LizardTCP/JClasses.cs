@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace LizardTCP
 {
@@ -23,5 +24,17 @@ namespace LizardTCP
         public bool useCFHeaders { get; set; }
         public string bindingIP { get; set; }
         public int bindingPort { get; set; }
+    }
+
+    public class WatchdogClass
+    {
+        [JsonProperty("userEndpoint")]
+        public string UserEndpoint { get; set; }
+
+        [JsonProperty("connects")]
+        public int Connects { get; set; }
+
+        [JsonProperty("ruleID")]
+        public int RuleID { get; set; }
     }
 }

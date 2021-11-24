@@ -43,8 +43,8 @@ namespace PacketTester
 
                         Console.WriteLine(message);
                         // отправляем обратно сообщение в верхнем регистре
-                        message = message.Substring(message.IndexOf(':') + 1).Trim().ToUpper();
-                        data = Encoding.Unicode.GetBytes(message);
+
+                        data = Encoding.Unicode.GetBytes("Hello from test tcp server!");
                         stream.Write(data, 0, data.Length);
                     }
                 }
@@ -141,9 +141,9 @@ namespace PacketTester
 
                         message = builder.ToString();
                         PacketCountRecv++;
-                        //Console.WriteLine("Сервер: {0}", message);
-                        //Thread.Sleep(5);
-                        if (PacketCountSent != 0 && PacketCountSent % 1000 == 0)
+                        Console.WriteLine("Server answer: {0}", message);
+                        Thread.Sleep(10);
+                        if (PacketCountSent != 0 && PacketCountSent % 100 == 0)
                         {
                             Console.WriteLine($"{DateTime.Now} | Speedtest stats: Sent: {PacketCountSent} Recv: {PacketCountRecv} | SpeedSent: {PacketCountSent - PPacketCountSent} / {(DateTime.Now - Previous).TotalMilliseconds }ms | {(PacketCountSent - PPacketCountSent) / (DateTime.Now - Previous).TotalMilliseconds } S/MS | SpeedRecv: {PacketCountRecv - PPacketCountRecv} / {(DateTime.Now - Previous).TotalMilliseconds}ms | {(PacketCountRecv - PPacketCountRecv) / (DateTime.Now - Previous).TotalMilliseconds } S/MS");
                         }

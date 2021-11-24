@@ -11,12 +11,14 @@ namespace Program
             int l = int.Parse(Console.ReadLine());
             if (l == 1)
             {
+                Console.Title = "Example TCP Server";
                 string addr = Console.ReadLine();
                 int port = int.Parse(Console.ReadLine());
                 TcpServerClass.ClientObject.ServerInstance(addr, port);
             }
             else if (l == 2)
             {
+                Console.Title = "Example TCP Client";
                 string addr = Console.ReadLine();
                 int port = int.Parse(Console.ReadLine());
                 TcpClientClass.ClientInstance(addr, port);

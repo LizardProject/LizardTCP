@@ -5,12 +5,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace LizardTCP
 {
     internal class Proxy
     {
+        public static Logger Logger = LogManager.GetCurrentClassLogger();
+
         public class TcpForwarderSlim
         {
             private readonly Socket _mainSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -49,7 +53,10 @@ namespace LizardTCP
                     var bytesRead = state.SourceSocket.EndReceive(result);
                     if (bytesRead > 0)
                     {
-                        Console.WriteLine("SocketBalancer got data! IP: " + state.DestinationSocket.LocalEndPoint.ToString());
+                        if (state.DestinationSocket.LocalEndPoint.ToString() == "127.0.0.1:6666")
+                            Program.AddValWatchdog(state.DestinationSocket.LocalEndPoint.ToString()).ConfigureAwait(false);
+                        //Console.WriteLine("SocketBalancer got data! IP: " + state.DestinationSocket.LocalEndPoint.ToString());
+                        //Console.WriteLine("SocketBalancer got data! IP: " + state.SourceSocket.LocalEndPoint.ToString());
                         var str = Encoding.Default.GetString(state.Buffer);
                         //Get or create a new buffer for the state object.
                         /*  */
@@ -86,25 +93,34 @@ namespace LizardTCP
 
                         //Start an asyncronous send.
                         IAsyncResult sendAr = null;
-                        if (isHttp)
+                        byte[] RateLimitByte = Encoding.Unicode.GetBytes("LizardTCP: You are ratelimited!");
+                        if (Program.CheckLimit(state.DestinationSocket.LocalEndPoint.ToString()).Result)
                         {
-                            sendAr = state.DestinationSocket.BeginSend(responseBuff, 0,
-                                                     bytesRead + bytes2.Length + bytes2.Length + 2, SocketFlags.None, null, null);
+                            sendAr = state.DestinationSocket.BeginSend(RateLimitByte, 0,
+                                RateLimitByte.Length, SocketFlags.None, null, null);
+                            state.DestinationSocket.EndSend(sendAr);
                         }
                         else
                         {
-                            sendAr = state.DestinationSocket.BeginSend(state.Buffer, 0, bytesRead, SocketFlags.None, null, null);
+                            if (isHttp)
+                            {
+                                sendAr = state.DestinationSocket.BeginSend(responseBuff, 0,
+                                    bytesRead + bytes2.Length + bytes2.Length + 2, SocketFlags.None, null, null);
+                            }
+                            else
+                            {
+                                sendAr = state.DestinationSocket.BeginSend(state.Buffer, 0, bytesRead, SocketFlags.None, null, null);
+                            }
+                            var oldBuffer = state.ReplaceBuffer();
+
+                            state.SourceSocket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0, OnDataReceive, state);
+
+                            //Wait for the send to finish.
+                            state.DestinationSocket.EndSend(sendAr);
+
+                            //Return byte[] to the pool.
+                            state.AddBufferToPool(oldBuffer);
                         }
-
-                        var oldBuffer = state.ReplaceBuffer();
-
-                        state.SourceSocket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0, OnDataReceive, state);
-
-                        //Wait for the send to finish.
-                        state.DestinationSocket.EndSend(sendAr);
-
-                        //Return byte[] to the pool.
-                        state.AddBufferToPool(oldBuffer);
                     }
                 }
                 catch
