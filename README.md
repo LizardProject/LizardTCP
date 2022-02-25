@@ -42,3 +42,4 @@ Development stages:
 - [ ] WebSocket Support
 - [x] TCP Support
 - [ ] UDP Support
+- [ ] Simple DPI Interface
